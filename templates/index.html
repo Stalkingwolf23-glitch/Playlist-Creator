@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block main %}
+{% include "message.html" %}
+    <form method="GET" action="{{ url_for('index') }}">
+        <div class="d-flex justify-content-center align-items-center">
+            <label for="Datalist" class="form-label align-text-middle">Select Genre:</label>
+            <input autofocus class="form-control mx-1 w-auto" list="datalistOptions" id="genreselect" name="genreselect" placeholder="Type to search...">
+            <datalist id="datalistOptions">
+                {% for genre in genrelist %}
+                    <option value="{{ genre }}"></option>
+                {% endfor %}
+            </datalist>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+    <br>
+    {% if songs %}
+        <div>
+            <table class="table table-hover table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Song</th>
+                        <th scope="col">Playlist</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for song in songs %}
+                        <tr>
+                            <td class="text-start">{{ song }}</td>
+                            <td><select id="playlist-select">
+                                <option style="display:none" disabled selected value> </option>
+                                {% for playlist in playlists %}
+                                    <option value="{{ playlist }}">{{ playlist }}</option>
+                                {% endfor %}
+                            </select></td>
+                            <td class="text-end"><button class="btn btn-secondary add-to-playlist" data-song="{{ song }}">
+                                <span class="btn-text">Add to Playlist</span>
+                                <i class="fas fa-check check-icon" style="display: none;"></i>
+                            </button></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="d-flex justify-content-center mt-4">
+            <nav>
+                <ul class="pagination">
+                    {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', genreselect=request.args.get('genreselect'), page=page-1) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+        
+                    {% if page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('index', genreselect=request.args.get('genreselect'), page=page+1) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                $(".add-to-playlist").on("click", function() {
+                    var songName = $(this).data("song");
+                    var playlistName = $("#playlist-select").val();
+
+                    if (!playlistName) {
+                        alert("No Playlist Selected");
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "/add_song_to_playlist",
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            song: songName,
+                            playlist: playlistName
+                        }),
+                        success: function(response) {
+                            if (response.status == "success") {
+                                alert(response.message); //Possibly change to just update button to be a checkmark instead to be more dynamic
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function() {
+                            alert("Error Adding Song");
+                        }
+                    });
+                });
+            });
+
+            $(document).ready(function() {
+                $("form").on("submit", function(e) {
+                    e.preventDefault();
+
+                    var genre = $("#genreselect").val();
+                    var encodedGenre = encodeURIComponent(genre);
+                    var currentPage = new URLSearchParams(window.location.search).get("page") || 1;
+
+                    $.ajax({
+                        url: "/index?genreselect=" + encodedGenre + "&page=" + currentPage,
+                        type: "GET",
+                        
+                    });
+            });
+        });
+        </script>
+    {% endif %}
+{% endblock %}

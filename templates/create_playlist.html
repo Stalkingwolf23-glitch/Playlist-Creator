@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Playlists
+{% endblock %}
+
+{% block main %}
+{% include "message.html" %}
+    <form action="/create_playlist" method="post">
+        <h4>Create Playlist</h4>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="playlist_name" name="playlist_name" placeholder="Enter playlist name" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Create</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Playlists
+{% endblock %}
+
+{% block main %}
+{% include "message.html" %}
+    <h1>{{ playlist_name }}</h1>
+    <br>
+    {% if songs %}
+    <table class="table table-hover table-striped">
+        <tbody>
+            {% for song in songs %}
+                <tr>
+                    <td class="text-start">{{ song }}</td>
+                    <td class="text-end">
+                        <form action="{{ url_for('delete_song', song_name=song, playlist=playlist_name) }}" method="POST">
+                            <button type="submit" class="btn btn-danger"><span class="btn-text">Delete</span></button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    {% else %}
+        <p>No songs in playlist yet</p>
+    {% endif %}
+
+    <a href="{{ url_for('playlist') }}">Back to Playlists</a>
+{% endblock %}
