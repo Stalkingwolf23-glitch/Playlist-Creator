@@ -15,6 +15,11 @@ load_dotenv()
         
 cid = os.getenv("CID")
 secret = os.getenv("SECRET")
+<<<<<<< HEAD
+=======
+print(cid)
+print(secret)
+>>>>>>> 7a2670e (Initial Commit)
 
 app = Flask(__name__)
 db = sqlite3.connect("music.db", check_same_thread=False)
