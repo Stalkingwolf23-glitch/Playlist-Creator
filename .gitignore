@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 *.cache
 flask_session/
+
+#ignore db file
+music.db

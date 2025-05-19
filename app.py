@@ -68,26 +68,31 @@ def index():
     print("Genre:", genrechoice)
     songs = []
     items = []
+    total_pages = 0
 
-    page = request.args.get('page', 1, type=int)  # Get the page number from the query parameter
-    per_page = 20  # Number of items per page
-    offset = (page - 1) * per_page  # Calculate the offset based on the page number
+    # Only fetch songs if a genre is selected
+    if genrechoice:
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        offset = (page - 1) * per_page
 
-    # Get the search results for the current page
-    result = sp.search(q="genre: {genre}".format(genre=genrechoice), type="track", limit=per_page, offset=offset)
-    items = result['tracks']['items']
-
-    for i in items:
-        if i["name"] not in songs:
-            songs.append(i["name"])
-
-    total_songs = result['tracks']['total']  # Calculate total songs
-    total_pages = (total_songs // per_page) + (1 if total_songs % per_page > 0 else 0)  # Calculate total pages
+        result = sp.search(q=f"genre:{genrechoice}", type="track", 
+                          limit=per_page, offset=offset)
+        items = result['tracks']['items']
+        songs = [i["name"] for i in items if i["name"] not in songs]
+        total_songs = result['tracks']['total']
+        total_pages = (total_songs // per_page) + (1 if total_songs % per_page > 0 else 0)
 
     cursor.execute("SELECT name FROM playlists WHERE user_id = ?", (session["user_id"],))
     playlists = [x[0] for x in cursor.fetchall()]
 
-    return render_template("index.html", genrelist=genrelist, songs=songs, page=page, total_pages=total_pages, playlists=playlists)
+    return render_template("index.html", 
+                         genrelist=genrelist, 
+                         songs=songs if genrechoice else None,  # Pass None if no genre
+                         page=page if genrechoice else 1,
+                         total_pages=total_pages,
+                         playlists=playlists,
+                         selected_genre=genrechoice)  # Pass the selected genre to template
 
 @app.route("/playlist", methods=["GET","POST"])
 @login_required

@@ -6,6 +6,7 @@
 
 {% block main %}
 {% include "message.html" %}
+
     <form method="GET" action="{{ url_for('index') }}">
         <div class="d-flex justify-content-center align-items-center">
             <label for="Datalist" class="form-label align-text-middle">Select Genre:</label>
@@ -48,25 +49,28 @@
             </table>
         </div>
         
-        <div class="d-flex justify-content-center mt-4">
-            <nav>
-                <ul class="pagination">
-                    {% if page > 1 %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', genreselect=request.args.get('genreselect'), page=page-1) }}">Previous</a>
-                        </li>
-                    {% endif %}
-                    
-                    <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+    <!-- Pagination (only show if genre is selected) -->
+    <div class="d-flex justify-content-center mt-4">
+        <nav>
+            <ul class="pagination">
+                {% if page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('index', genreselect=selected_genre, page=page-1) }}">Previous</a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ page }} of {{ total_pages }}</span>
+                </li>
         
-                    {% if page < total_pages %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', genreselect=request.args.get('genreselect'), page=page+1) }}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+                {% if page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('index', genreselect=selected_genre, page=page+1) }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>    
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
@@ -102,21 +106,6 @@
                 });
             });
 
-            $(document).ready(function() {
-                $("form").on("submit", function(e) {
-                    e.preventDefault();
-
-                    var genre = $("#genreselect").val();
-                    var encodedGenre = encodeURIComponent(genre);
-                    var currentPage = new URLSearchParams(window.location.search).get("page") || 1;
-
-                    $.ajax({
-                        url: "/index?genreselect=" + encodedGenre + "&page=" + currentPage,
-                        type: "GET",
-                        
-                    });
-            });
-        });
         </script>
     {% endif %}
 {% endblock %}
